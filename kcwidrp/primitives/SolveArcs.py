@@ -111,7 +111,7 @@ class SolveArcs(BasePrimitive):
                                              % aw)
                         continue
                     # check if window no longer contains initial value
-                    if minow > line_x > maxow:
+                    if line_x < minow or line_x > maxow:
                         rej_wave.append(aw)
                         rej_flux.append(self.action.args.at_flux[iw])
                         nrej += 1
@@ -157,7 +157,7 @@ class SolveArcs(BasePrimitive):
                     # calculate centroid
                     cent = np.sum(xvec * yvec) / np.sum(yvec)
                     # how different is the centroid from the peak?
-                    if abs(cent - peak) > 0.7:
+                    if abs(cent - peak) > 0.8:
                         # keep track of rejected line
                         rej_wave.append(aw)
                         rej_flux.append(self.action.args.at_flux[iw])
@@ -278,49 +278,51 @@ class SolveArcs(BasePrimitive):
             rej_rsd_flux = []   # rejected line fluxes
             # iteratively remove outliers
             it = 0
-            while (max_resid > 2.5 * wsig or max_resid >= 10.) and it < 25:
-                arc_dat = []    # arc line pixel values
-                arc_fdat = []   # arc line flux data
-                at_dat = []     # atlas line wavelength values
-                at_fdat = []    # atlas line flux data
-                # trim largest outlier
-                for il, rsd in enumerate(resid):
-                    if abs(rsd) < max_resid and abs(rsd) < 10.:
-                        # append data for line that passed cut
-                        arc_dat.append(arc_pix_dat[il])
-                        arc_fdat.append(arc_int_dat[il])
-                        at_dat.append(at_wave_dat[il])
-                        at_fdat.append(at_flux_dat[il])
-                    else:
-                        if verbose:
-                            self.logger.info("It%d REJ: %d, %.2f, %.3f, %.3f" %
-                                             (it, il, arc_pix_dat[il],
-                                              at_wave_dat[il], rsd))
-                        # keep track of rejected lines
-                        rej_rsd_wave.append(at_wave_dat[il])
-                        rej_rsd_flux.append(at_flux_dat[il])
-                        rej_rsd.append(rsd)
-                # copy cleaned data back into input arrays
-                arc_pix_dat = arc_dat.copy()
-                arc_int_dat = arc_fdat.copy()
-                at_wave_dat = at_dat.copy()
-                at_flux_dat = at_fdat.copy()
-                # refit cleaned data
-                wfit = np.polyfit(arc_pix_dat, at_wave_dat, poly_order)
-                # new wavelength function
-                pwfit = np.poly1d(wfit)
-                # new wavelengths for arc lines
-                arc_wave_fit = pwfit(arc_pix_dat)
-                # calculate residuals of arc lines
-                resid = arc_wave_fit - at_wave_dat
-                # get statistics
-                resid_c, low, upp = sigmaclip(resid, low=3., high=3.)
-                wsig = resid_c.std()
-                # maximum outlier
-                max_resid = np.max(abs(resid))
-                # wsig = np.nanstd(resid)
-                it += 1
-            # END while max_resid > 3.5 * wsig and it < 5:
+            # only reject if we have enough points
+            if len(arc_pix_dat) > (poly_order + 1):
+                while (max_resid > 2.5 * wsig or max_resid >= 10.) and it < 25:
+                    arc_dat = []    # arc line pixel values
+                    arc_fdat = []   # arc line flux data
+                    at_dat = []     # atlas line wavelength values
+                    at_fdat = []    # atlas line flux data
+                    # trim largest outlier
+                    for il, rsd in enumerate(resid):
+                        if abs(rsd) < max_resid and abs(rsd) < 10.:
+                            # append data for line that passed cut
+                            arc_dat.append(arc_pix_dat[il])
+                            arc_fdat.append(arc_int_dat[il])
+                            at_dat.append(at_wave_dat[il])
+                            at_fdat.append(at_flux_dat[il])
+                        else:
+                            if verbose:
+                                self.logger.info("It%d REJ: %d, %.2f, %.3f, %.3f" %
+                                                 (it, il, arc_pix_dat[il],
+                                                  at_wave_dat[il], rsd))
+                            # keep track of rejected lines
+                            rej_rsd_wave.append(at_wave_dat[il])
+                            rej_rsd_flux.append(at_flux_dat[il])
+                            rej_rsd.append(rsd)
+                    # copy cleaned data back into input arrays
+                    arc_pix_dat = arc_dat.copy()
+                    arc_int_dat = arc_fdat.copy()
+                    at_wave_dat = at_dat.copy()
+                    at_flux_dat = at_fdat.copy()
+                    # refit cleaned data
+                    wfit = np.polyfit(arc_pix_dat, at_wave_dat, poly_order)
+                    # new wavelength function
+                    pwfit = np.poly1d(wfit)
+                    # new wavelengths for arc lines
+                    arc_wave_fit = pwfit(arc_pix_dat)
+                    # calculate residuals of arc lines
+                    resid = arc_wave_fit - at_wave_dat
+                    # get statistics
+                    resid_c, low, upp = sigmaclip(resid, low=3., high=3.)
+                    wsig = resid_c.std()
+                    # maximum outlier
+                    max_resid = np.max(abs(resid))
+                    # wsig = np.nanstd(resid)
+                    it += 1
+                # END while max_resid > 3.5 * wsig and it < 5:
             # log arc bar results
             self.logger.info("")
             self.logger.info("BAR %03d, Slice = %02d, RMS = %.3f, N = %d" %
@@ -354,14 +356,14 @@ class SolveArcs(BasePrimitive):
                     p.diamond(rej_rsd_wave, rej_rsd, color='orange',
                               legend_label='Rej', size=8)
                 xlim = [self.action.args.atminwave, self.action.args.atmaxwave]
-                ylim = [np.nanmin(list(resid)+list(rej_rsd)),
-                        np.nanmax(list(resid)+list(rej_rsd))]
+                ylim = get_plot_lims(list(resid)+list(rej_rsd))
                 p.line(xlim, [0., 0.], color='black', line_dash='dotted')
                 p.line(xlim, [wsig, wsig], color='gray', line_dash='dashdot')
                 p.line(xlim, [-wsig, -wsig], color='gray', line_dash='dashdot')
                 p.line([self.action.args.cwave, self.action.args.cwave],
                        ylim, legend_label='CWAV', color='magenta',
                        line_dash='dashdot')
+                set_plot_lims(p, xlim=xlim, ylim=ylim)
                 bokeh_plot(p, self.context.bokeh_session)
                 input("Next? <cr>: ")
 
@@ -425,7 +427,7 @@ class SolveArcs(BasePrimitive):
                     coef.append(c[ic])
                 p.diamond(list(range(nbars)), coef, size=8)
                 xlim = [-1, nbars]
-                ylim = get_plot_lims(coef)
+                ylim = get_plot_lims(coef, clip=False)
                 p.xgrid.grid_line_color = None
                 oplot_slices(p, ylim)
                 set_plot_lims(p, xlim=xlim, ylim=ylim)
