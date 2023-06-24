@@ -1,3 +1,6 @@
+kcrm_merge_nik is a branch that will attempt to merge kcrm_merge with Nik's fork's master branch
+
+
 ==============================================
 Keck Cosmic Web Imager Data Reduction Pipeline
 ==============================================
