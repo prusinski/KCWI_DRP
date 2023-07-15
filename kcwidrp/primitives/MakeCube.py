@@ -122,6 +122,7 @@ class MakeCube(BasePrimitive):
 
         self.logger.info("%d arc frames found" % len(tab))
         ofn = strip_fname(tab['filename'][0]) + "_geom.pkl"
+        print(f'first ofn: {ofn}')
         geom_file = os.path.join(self.config.instrument.cwd,
                                  self.config.instrument.output_directory,
                                  ofn)
@@ -168,6 +169,21 @@ class MakeCube(BasePrimitive):
                     self.config.instrument.cwd,
                     self.config.instrument.output_directory, skyfn)
                 if os.path.exists(full_path):
+                    sky = kcwi_fits_reader(full_path)[0]
+                    data_sky = sky.data
+                
+            if self.config.instrument.make_sky_cubes:
+                print('We are making a sky cube!')
+                ofn = self.action.args.name
+                skyfn = strip_fname(ofn) + '_sky.fits'
+                #skyfn = strip_fname(tab['filename'][0]) + '_sky.fits'
+                full_path = os.path.join(
+                    self.config.instrument.cwd,
+                    self.config.instrument.output_directory, skyfn)
+                print(skyfn)
+                print(full_path)
+                if os.path.exists(full_path):
+                    print('We are REALLY making a sky cube')
                     sky = kcwi_fits_reader(full_path)[0]
                     data_sky = sky.data
             # check for geometry maps
