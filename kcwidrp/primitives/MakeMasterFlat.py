@@ -153,7 +153,7 @@ class MakeMasterFlat(BaseImg):
         ffright = int(70/xbin)
         nrefx = int(ffright - ffleft)
         # YC: The parameter above causes the bspline knots at the two ends having no real
-        #   data to fit with. So the mflat unnecessarily curves down at the ends. 
+        #   data to fit with. So the mflat unnecessarily curves down at the ends.
         #   It might be fixable by redefining knots, but not going to test now.
 
         buffer = 6.0/float(xbin)
@@ -495,7 +495,7 @@ class MakeMasterFlat(BaseImg):
         # if we are fitting a twilight flat, treat it like a sky image with a
         # larger number of knots
         if twiflat:
-            knots = int(ny * knotspp)
+            knots = 25 #int(ny * knotspp)
         else:
             knots = 100
         self.logger.info("Using %d knots for bspline fit" % knots)
@@ -550,6 +550,7 @@ class MakeMasterFlat(BaseImg):
         else:
             nwaves = 1000
         waves = minwave + (maxwave - minwave) * np.arange(nwaves+1) / nwaves
+        print(f'Waves len: {len(waves)}')
         if self.config.instrument.plot_level >= 1:
             # output filename stub
             rbfnam = "redblue_%05d_%s_%s_%s" % \
@@ -557,7 +558,7 @@ class MakeMasterFlat(BaseImg):
                        self.action.args.illum, self.action.args.grating,
                        self.action.args.ifuname)
             if xbin == 1:
-                stride = int(len(xfr) / 8000.)
+                stride = int(len(xfr) / 80.)
                 if stride <= 0:
                     stride = 1
             else:
