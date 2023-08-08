@@ -14,6 +14,8 @@ import numpy as np
 from scipy.signal.windows import boxcar
 import scipy as sp
 from scipy.signal import find_peaks
+from astropy.io import fits
+from datetime import datetime
 
 
 def bm_ledge_position(cwave):
@@ -546,23 +548,26 @@ class MakeMasterFlat(BaseImg):
         maxwave = np.max(xfd)
         # are we a twilight flat?
         if twiflat:
-            nwaves = int(ny * knotspp)
+            nwaves = 25 #int(ny * knotspp) # this is to detect a crossover
         else:
             nwaves = 1000
         waves = minwave + (maxwave - minwave) * np.arange(nwaves+1) / nwaves
-        print(f'Waves len: {len(waves)}')
+        # print(f'Waves len: {len(waves)}')
         if self.config.instrument.plot_level >= 1:
             # output filename stub
             rbfnam = "redblue_%05d_%s_%s_%s" % \
                       (self.action.args.ccddata.header['FRAMENO'],
                        self.action.args.illum, self.action.args.grating,
                        self.action.args.ifuname)
-            if xbin == 1:
-                stride = int(len(xfr) / 80.)
-                if stride <= 0:
-                    stride = 1
-            else:
-                stride = 1
+            # if xbin == 1:
+            #     stride = int(len(xfr) / 80.)
+            #     if stride <= 0:
+            #         stride = 1
+            # else:
+            #     stride = 1
+            stride=1
+
+
             xrplt = xfr[::stride]
             yrplt = yfitr[::stride]
             yrplt_d = yfr[::stride]
@@ -790,10 +795,11 @@ class MakeMasterFlat(BaseImg):
                       (self.action.args.ccddata.header['FRAMENO'],
                        self.action.args.illum, self.action.args.grating,
                        self.action.args.ifuname)
-            if xbin == 1:
-                stride = int(len(allx) / 8000.)
-            else:
-                stride = 1
+            # if xbin == 1:
+            #     stride = int(len(allx) / 8000.)
+            # else:
+            #     stride = 1
+            stride=1
             xplt = allfx[::stride]
             yplt = ally[::stride]
             fxplt = allx[::stride]
@@ -831,6 +837,13 @@ class MakeMasterFlat(BaseImg):
         ratio = np.zeros(newflat.shape, dtype=float)
         qzer = [i for i, v in enumerate(newflat.flat) if v != 0]
         ratio.flat[qzer] = comflat.flat[qzer] / newflat.flat[qzer]
+
+        current_time = datetime.now().strftime("%H:%M:%S")
+
+        print('Saving Files')
+        print(comflat.shape)
+        fits.PrimaryHDU(comflat).writeto(f'/Volumes/Data/Documents/Chuck/KCWI_DRP/pyDRP/mtwif_correct_mflat/2021apr15_test_data/comflat_{current_time}.fits')
+        fits.PrimaryHDU(newflat).writeto(f'/Volumes/Data/Documents/Chuck/KCWI_DRP/pyDRP/mtwif_correct_mflat/2021apr15_test_data/newflat_{current_time}.fits')
 
         # set up flags
         flags = np.zeros_like(ratio, dtype=np.uint8)
