@@ -72,9 +72,12 @@ class MakeMasterSky(BaseImg):
                 # skip comments
                 if row.startswith('#'):
                     continue
+<<<<<<< HEAD
                 # skip empty lines
                 if len(row.split()) < 1:
                     continue
+=======
+>>>>>>> 39e2b9a (Allow skipping of sky subtraction using 'kcwi.sky' file in MakeMasterSky.py, and code cleanup in SubtractSky.py)
                 # Parse row:
                 # <raw sci file> <raw sky file> <optional mask file>
                 #  OR
