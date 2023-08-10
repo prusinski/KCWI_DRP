@@ -641,7 +641,7 @@ def cholesky_solve(a, bb):
 
 
 def iterfit(xdata, ydata, invvar=None, upper=5, lower=5, x2=None,
-            maxiter=10, nord=4, bkpt=None, fullbkpt=None,
+            maxiter=2, nord=4, bkpt=None, fullbkpt=None,
             kwargs_bspline={}, kwargs_reject={}):
     """Iteratively fit a B-spline set to data, with rejection.
 
@@ -741,6 +741,17 @@ def iterfit(xdata, ydata, invvar=None, upper=5, lower=5, x2=None,
     error = 0
     qdone = False
     while (error != 0 or qdone is False) and iiter <= maxiter:
+        bk = 1000
+
+        arr = np.linspace(np.min(xwork), np.max(xwork), bk)
+        range = (np.max(xwork) - np.min(xwork))/(bk-1)
+        for i in arr:
+            testvar = np.var(ywork[(maskwork==True) & (xwork >= i) & (xwork < i+range)])
+
+            if ~np.isfinite((1/testvar)):
+                continue
+            invwork[(xwork > i) & (xwork < i+range)] = 1/testvar
+
         goodbk = sset.mask.nonzero()[0]
         if maskwork.sum() <= 1 or not sset.mask.any():
             sset.coeff = 0
@@ -763,6 +774,7 @@ def iterfit(xdata, ydata, invvar=None, upper=5, lower=5, x2=None,
                         sset.mask[goodbk[ileft]] = False
             error, yfit = sset.fit(xwork, ywork, invwork*maskwork,
                                    x2=x2work)
+        print(f'Iteration: {iiter+1}')
         iiter += 1
         inmask = maskwork
         if error == -2:
@@ -773,6 +785,8 @@ def iterfit(xdata, ydata, invvar=None, upper=5, lower=5, x2=None,
                                          inmask=inmask, outmask=maskwork,
                                          upper=upper, lower=lower,
                                          **kwargs_reject)
+            #recompute invwork
+            invwork = (invwork*0.) + 1/np.var(ywork[maskwork==True])
         else:
             pass
     outmask[xsort] = maskwork

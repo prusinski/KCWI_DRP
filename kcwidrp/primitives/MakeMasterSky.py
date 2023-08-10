@@ -425,6 +425,10 @@ class MakeMasterSky(BaseImg):
 
         finiteflux = np.isfinite(self.action.args.ccddata.data.flat)
 
+        # add cosmic rays to binary mask (don't want them contributing)
+        print('Masking CRs')
+        binary_mask[self.action.args.ccddata.flags != 0] = True
+
         # get un-masked points mapped to exposed regions on CCD
         # handle dichroic bad region
         if self.action.args.dich:
