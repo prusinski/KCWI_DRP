@@ -386,8 +386,12 @@ def main():
                             framework.default_on_exit()
         framework.ingest_data(None, frames, False)
         with open(args.file_list + '_ingest', 'w') as ingest_f:
+<<<<<<< HEAD
             ingest_f.write('Files ingested at: ' +
                            datetime.datetime.now().isoformat())
+=======
+            ingest_f.write('Files ingested at: ' + datetime.datetime.now().isoformat())
+>>>>>>> c8f3675 (Change done to ingest log in reduce_kcwi.py)
 
     # ingest an entire directory, trigger "next_file" (which is an option
     # specified in the config file) on each file,
