@@ -372,15 +372,9 @@ def main():
                             framework.end()
                             framework.default_on_exit()
         framework.ingest_data(None, frames, False)
-<<<<<<< HEAD
         with open(args.file_list + '_ingest', 'w') as ingest_f:
             ingest_f.write('Files ingested at: ' +
                            datetime.datetime.now().isoformat())
-=======
-        with open(args.file_list + '_done', 'w') as donef:
-            donef.write(datetime.datetime.now().isoformat())
->>>>>>> 31c75d8 (Forgot write flag in file open for timestamp in reduce_kcwi.py)
-
     # ingest an entire directory, trigger "next_file" (which is an option
     # specified in the config file) on each file,
     # optionally continue to monitor if -m is specified
