@@ -431,10 +431,6 @@ def main():
     framework.start(args.queue_manager_only, args.ingest_data_only,
                     args.wait_for_event, args.continuous)
 
-    if args.file_list:
-        with open(args.file_list+'_done') as donef:
-            donef.write(datetime.datetime.now().isoformat())
-
 
 if __name__ == "__main__":
     main()
