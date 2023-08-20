@@ -388,6 +388,7 @@ def main():
         with open(args.file_list + '_ingest', 'w') as ingest_f:
             ingest_f.write('Files ingested at: ' +
                            datetime.datetime.now().isoformat())
+
     # ingest an entire directory, trigger "next_file" (which is an option
     # specified in the config file) on each file,
     # optionally continue to monitor if -m is specified
