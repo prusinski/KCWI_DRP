@@ -5,3 +5,7 @@
 *__pycache__*
 /build
 *.egg
+.DS_Store
+.DS_Store?
+.Spotlight-V100
+.Trashes
