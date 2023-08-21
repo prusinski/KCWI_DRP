@@ -3,7 +3,7 @@ from kcwidrp.primitives.kcwi_file_primitives import kcwi_fits_reader, \
     kcwi_fits_writer, get_master_name, strip_fname
 
 import os
-
+from astropy.io import fits
 
 class CorrectIllumination(BasePrimitive):
     """Subtract master bias frame"""
@@ -24,6 +24,7 @@ class CorrectIllumination(BasePrimitive):
         tab = self.context.proctab.search_proctab(frame=self.action.args.ccddata,
                                              target_type=target_type,
                                              nearest=True)
+        print(tab)
         if len(tab) <= 0:
             # next look for twilight flat
             target_type = self.config.instrument.flat_order[1]
@@ -68,16 +69,31 @@ class CorrectIllumination(BasePrimitive):
                              self.config.instrument.output_directory,
                              self.action.args.master_flat))[0]
 
-            # do the correction
-            self.action.args.ccddata.data *= mflat.data
-            self.action.args.ccddata.flags += mflat.flags
-            if self.action.args.ccddata.uncertainty is not None:
-                self.action.args.ccddata.uncertainty.array *= mflat.data
+            if self.config.instrument.smoothed_mtwif:
+                print('Using Smoothed twiflat')
+                mtwif_smooth = fits.open('/Volumes/Data/Documents/Chuck/KCWI_DRP/pyDRP/mtwif_correct_mflat/mtwif_slice_median_box.fits')[0].data
+                self.action.args.ccddata.data *= mflat.data * mtwif_smooth
+                self.action.args.ccddata.flags += mflat.flags
+                if self.action.args.ccddata.uncertainty is not None:
+                    self.action.args.ccddata.uncertainty.array *= mflat.data * mtwif_smooth
 
-            # update header keywords
-            self.action.args.ccddata.header[key] = (True, keycom)
-            self.action.args.ccddata.header['MFFILE'] = (
-                self.action.args.master_flat, "Master flat filename")
+                # update header keywords
+                self.action.args.ccddata.header[key] = (True, keycom)
+                self.action.args.ccddata.header['MFFILE'] = (
+                    self.action.args.master_flat, "Master flat filename")
+                self.action.args.ccddata.header['MTWFFILE'] = (
+                    'mtwif_slice_median_box.fits', "Master twiflat filename")
+            else:
+                # do the correction
+                self.action.args.ccddata.data *= mflat.data
+                self.action.args.ccddata.flags += mflat.flags
+                if self.action.args.ccddata.uncertainty is not None:
+                    self.action.args.ccddata.uncertainty.array *= mflat.data
+
+                # update header keywords
+                self.action.args.ccddata.header[key] = (True, keycom)
+                self.action.args.ccddata.header['MFFILE'] = (
+                    self.action.args.master_flat, "Master flat filename")
 
             # check for obj, sky observations
             if self.action.args.nasmask and self.action.args.numopen > 1:

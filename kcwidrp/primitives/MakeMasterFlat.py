@@ -497,7 +497,7 @@ class MakeMasterFlat(BaseImg):
         # if we are fitting a twilight flat, treat it like a sky image with a
         # larger number of knots
         if twiflat:
-            knots = 25 #int(ny * knotspp)
+            knots = int(ny * knotspp) #25
         else:
             knots = 100
         self.logger.info("Using %d knots for bspline fit" % knots)
@@ -548,7 +548,7 @@ class MakeMasterFlat(BaseImg):
         maxwave = np.max(xfd)
         # are we a twilight flat?
         if twiflat:
-            nwaves = 25 #int(ny * knotspp) # this is to detect a crossover
+            nwaves = int(ny * knotspp) #25 # this is to detect a crossover
         else:
             nwaves = 1000
         waves = minwave + (maxwave - minwave) * np.arange(nwaves+1) / nwaves
@@ -559,13 +559,13 @@ class MakeMasterFlat(BaseImg):
                       (self.action.args.ccddata.header['FRAMENO'],
                        self.action.args.illum, self.action.args.grating,
                        self.action.args.ifuname)
-            # if xbin == 1:
-            #     stride = int(len(xfr) / 80.)
-            #     if stride <= 0:
-            #         stride = 1
-            # else:
-            #     stride = 1
-            stride=1
+            if xbin == 1:
+                stride = int(len(xfr) / 80.)
+                if stride <= 0:
+                    stride = 1
+            else:
+                stride = 1
+            # stride=1
 
 
             xrplt = xfr[::stride]

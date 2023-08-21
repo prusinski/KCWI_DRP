@@ -29,7 +29,7 @@ class StackFlats(BaseImg):
         #    self.logger.info(f"already have {len(self.stacked_list)},"
         #                     f" stacked flats, expecting 0")
         #    return False
-        # YC comment: once a mflat has been made, this will always return False, 
+        # YC comment: once a mflat has been made, this will always return False,
         #   so new frames are not being added to the stack. However, this temporary
         #   fix will make one stack every time new frame is added, and will slow
         #   down the pipeline. Is there a way to make a stack only at the end?
@@ -53,7 +53,7 @@ class StackFlats(BaseImg):
         """
         method = 'average'
         suffix = self.action.args.stack_type.lower()
-
+        print(f'StackFlats Suffix: {suffix}')
         self.logger.info("Stacking flats using method %s" % method)
 
         combine_list = list(self.combine_list['filename'])
@@ -64,7 +64,10 @@ class StackFlats(BaseImg):
         mask = None
         for flat in combine_list:
             # get flat intensity (int) image file name in redux directory
-            stackf.append(strip_fname(flat) + '_intd.fits')
+            if self.action.args.stack_type == 'STWIF':
+                stackf.append(strip_fname(flat) + '_intf.fits') #intd
+            else: # SDOME, SFLAT
+                stackf.append(strip_fname(flat) + '_intd.fits')
             flatfn = os.path.join(self.config.instrument.cwd,
                                   self.config.instrument.output_directory,
                                 stackf[-1])
@@ -80,13 +83,16 @@ class StackFlats(BaseImg):
 
         # Get the BPM out of one of the flats (bpm is the same for all)
         # and add it to the stacked flat as the stack's mask
-        last_flat_name = strip_fname(combine_list[-1]) + '_intd.fits'
+        if self.action.args.stack_type == 'STWIF':
+            last_flat_name = strip_fname(combine_list[-1]) + '_intf.fits' #intd
+        else:
+            last_flat_name = strip_fname(combine_list[-1]) + '_intd.fits'
         last_flat_path = os.path.join(self.config.instrument.cwd,
                                   self.config.instrument.output_directory,
                                 last_flat_name)
         last_flat = kcwi_fits_reader(last_flat_path)[0]
         stacked.mask = last_flat.mask
-        
+
         stacked.header['IMTYPE'] = self.action.args.stack_type
         stacked.header['NSTACK'] = (len(combine_list),
                                     'number of images stacked')
