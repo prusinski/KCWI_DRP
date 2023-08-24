@@ -69,9 +69,10 @@ class CorrectIllumination(BasePrimitive):
                              self.config.instrument.output_directory,
                              self.action.args.master_flat))[0]
 
-            if self.config.instrument.smoothed_mtwif:
+            if (self.config.instrument.smoothed_mtwif) & (isinstance(self.config.instrument.smoothed_mtwif_fn, str)):
                 print('Using Smoothed twiflat')
-                mtwif_smooth = fits.open('/Volumes/Data/Documents/Chuck/KCWI_DRP/pyDRP/mtwif_correct_mflat/mtwif_slice_median_box.fits')[0].data
+                print(f'Smoothed twiflat fn: {self.config.instrument.smoothed_mtwif_fn}')
+                mtwif_smooth = fits.open(self.config.instrument.smoothed_mtwif_fn)[0].data
                 self.action.args.ccddata.data *= mflat.data * mtwif_smooth
                 self.action.args.ccddata.flags += mflat.flags
                 if self.action.args.ccddata.uncertainty is not None:
