@@ -22,7 +22,7 @@ import traceback
 import os
 import pkg_resources
 
-from kcwidrp.pipelines.kcwi_pipeline import Kcwi_pipeline
+# from kcwidrp.pipelines.kcwi_pipeline import Kcwi_pipeline
 from kcwidrp.core.kcwi_proctab import Proctab
 import logging.config
 
@@ -99,6 +99,11 @@ def _parse_arguments(in_args: list) -> argparse.Namespace:
     parser.add_argument("-r", "--red", dest='red', action="store_true",
                         default=False, help="KCWI Red processing")
 
+    # breaking reduction into stages
+    parser.add_argument('-st', '--stage', dest='stage',
+                        help='Which stage of the reduction are we in?',
+                        default=None)
+
     out_args = parser.parse_args(in_args[1:])
     return out_args
 
@@ -115,7 +120,7 @@ def main():
         for in_frame in in_subset.index:
             arguments = Arguments(name=in_frame)
             framework.append_event('next_file', arguments, recurrent=True)
-    
+
     def process_list(in_list):
         for in_frame in in_list:
             arguments = Arguments(name=in_frame)
@@ -165,6 +170,14 @@ def main():
 
     # check for the output directory
     check_directory(kcwi_config.output_directory)
+
+    if args.stage is None:
+        from kcwidrp.pipelines.kcwi_pipeline import Kcwi_pipeline
+        print("Defualt Full Reduction")
+    elif args.stage=="ff":
+        from kcwidrp.pipelines.kcwi_pipeline_ff import Kcwi_pipeline
+        print("IDL Stage 1-4")
+
 
     try:
         framework = Framework(Kcwi_pipeline, framework_config_fullpath)

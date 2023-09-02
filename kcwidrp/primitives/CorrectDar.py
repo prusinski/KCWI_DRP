@@ -212,6 +212,10 @@ class CorrectDar(BasePrimitive):
                 output_del[:, padding_y:(padding_y + image_size[1]),
                            padding_x:(padding_x + image_size[2])] = dew.data
 
+        self.logger.info(f"Image cube DAR order = {self.config.instrument.DAR_shift_order}")
+        self.logger.info(f"Std. Dev. cube DAR order = {self.config.instrument.DAR_shift_order}")
+        self.logger.info(f"Mask cube DAR order = 1 (constant)")
+        self.logger.info(f"Flag cube DAR order = 1 (constant)")
         # Perform correction
         for j, wl in enumerate(waves):
             dispersion_correction = atm_disper(wref, wl, airmass)
@@ -220,13 +224,13 @@ class CorrectDar(BasePrimitive):
             y_shift = dispersion_correction * \
                 math.cos(projection_angle) / y_scale
             output_image[j, :, :] = shift(output_image[j, :, :], (y_shift,
-                                                                  x_shift))
+                                                                  x_shift), order=self.config.instrument.DAR_shift_order)
             output_stddev[j, :, :] = shift(output_stddev[j, :, :], (y_shift,
-                                                                    x_shift))
-            output_mask[j, :, :] = shift(output_mask[j, :, :], (y_shift,
-                                                                x_shift))
-            output_flags[j, :, :] = shift(output_flags[j, :, :], (y_shift,
-                                                                  x_shift))
+                                                                    x_shift), order=self.config.instrument.DAR_shift_order)
+            output_mask[j, :, :] = np.ceil(shift(output_mask[j, :, :], (y_shift,
+                                                                x_shift), order=1, mode = 'constant', cval=128))
+            output_flags[j, :, :] = np.ceil(shift(output_flags[j, :, :], (y_shift,
+                                                                  x_shift), order=1, mode = 'constant', cval=128))
         # for obj, sky if they exist
         if output_obj is not None:
             for j, wl in enumerate(waves):
