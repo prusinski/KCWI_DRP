@@ -124,6 +124,11 @@ class RemoveCosmicRays(BasePrimitive):
 
                 self.action.args.ccddata.flags[crmsk > 1e-3] += 4
 
+                # replace CR pixels by median values
+                self.logger.info("Replacing CR pixels by median values")
+                self.action.args.ccddata.data[crmsk > 1e-3] = 0
+                self.action.args.ccddata.data += crmsk
+
                 n_crs = int(crmsk.sum())
 
                 # update header
