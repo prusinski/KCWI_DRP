@@ -188,6 +188,9 @@ def main():
     elif args.stage=="ff":
         from kcwidrp.pipelines.kcwi_pipeline_ff import Kcwi_pipeline
         print("IDL Stage 1-4")
+    elif args.stage=="std":
+        from kcwidrp.pipelines.kcwi_pipeline_std import Kcwi_pipeline
+        print("IDL Stage 8 (Std. Star)")
 
 
     try:

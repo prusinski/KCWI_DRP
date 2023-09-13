@@ -245,7 +245,7 @@ class CorrectDar(BasePrimitive):
                                                                   x_shift), order=1, mode = 'constant', cval=128))
             if output_noskysub is not None:
                 output_noskysub[j, :, :] = shift(output_noskysub[j, :, :],
-                                                 (y_shift, x_shift))
+                                                 (y_shift, x_shift), order=self.config.instrument.DAR_shift_order)
         # for obj, sky if they exist
         if output_obj is not None:
             for j, wl in enumerate(waves):

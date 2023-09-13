@@ -117,7 +117,10 @@ class RemoveCosmicRays(BasePrimitive):
 
             if os.path.isfile(f"{self.config.instrument.output_directory}/{crmskName}"):
                 print(f'Opening {crmskName}')
-                crmsk = fits.open(f"{self.config.instrument.output_directory}/{crmskName}")[0].data
+                cr = fits.open(f"{self.config.instrument.output_directory}/{crmskName}")
+
+                crmsk = cr['PRIMARY'].data # this is the mask
+                crmed = cr['MEDSCI'].data # this is the mask * med(sci)
 
                 self.logger.info("CR mask cleaned cosmic rays")
                 header['history'] = f"{crmskName} cleaned cosmic rays"
@@ -127,7 +130,7 @@ class RemoveCosmicRays(BasePrimitive):
                 # replace CR pixels by median values
                 self.logger.info("Replacing CR pixels by median values")
                 self.action.args.ccddata.data[crmsk > 1e-3] = 0
-                self.action.args.ccddata.data += crmsk
+                self.action.args.ccddata.data += crmed
 
                 n_crs = int(crmsk.sum())
 
