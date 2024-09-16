@@ -175,6 +175,9 @@ def main():
     elif args.stage=='icube':
         from kcwidrp.pipelines.kcwi_pipeline_testing_icube import Kcwi_pipeline
         print('KCWI Pipeline IDL Stage 1-6')
+    elif args.stage=='flat':
+        from kcwidrp.pipelines.kcwi_pipeline_mflat_mtwif import Kcwi_pipeline
+        print('KCWI Pipeline intf before stack flat')
     else:
         from kcwidrp.pipelines.kcwi_pipeline import Kcwi_pipeline
         print("Invalid stage choice [0..3]: going with default (full) reduction")

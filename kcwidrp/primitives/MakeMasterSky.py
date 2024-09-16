@@ -224,8 +224,20 @@ class MakeMasterSky(BaseImg):
 
         # fluxes_test = fluxes[((waves < 5197) & (waves > 5201)) | ((waves < 5574) | (waves > 5581))]
         self.logger.info(f"Divide by zero errors are normal in inverse variance calculation")
+
+        if os.path.exists(self.action.args.skymask):
+            print('Sky Mask exists - using 4 iterations of pixel rejection, +/- 3-sigma clipping')
+            biter = 4
+            usig = 1
+            lsig = 1
+        else:
+            print('Sky Mask does not exist - using 4 iterations of pixel rejection, +/- 1-sigma clipping')
+            biter=4
+            usig = 1
+            lsig = 1
+
         sft0, gmask = Bspline.iterfit(waves, fluxes, fullbkpt=bkpt,
-                                      upper=1, lower=1, maxiter=4)
+                                      upper=usig, lower=lsig, maxiter=biter)
         gp = [i for i, v in enumerate(gmask) if v]
         yfit1, _ = sft0.value(waves)
         self.logger.info("Number of good points = %d" % len(gp))

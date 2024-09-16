@@ -30,6 +30,13 @@ class CorrectGain(BasePrimitive):
             self.action.args.ccddata.data[
                 parsed_section[0]:(parsed_section[1]+1),
                 parsed_section[2]:(parsed_section[3]+1)] *= gain
+            
+            if amplifier == 1:
+                ratio = 1.005408
+                self.action.args.ccddata.data[
+                    parsed_section[0]:(parsed_section[1]+1),
+                    parsed_section[2]:(parsed_section[3]+1)] *= ratio
+                print('Multiplying right amplifier by ratio = 1.0054')
 
         self.action.args.ccddata.header[key] = (True, keycom)
         self.action.args.ccddata.header['BUNIT'] = ('electron', 'Pixel units')

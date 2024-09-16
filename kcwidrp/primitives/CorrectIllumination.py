@@ -83,7 +83,8 @@ class CorrectIllumination(BasePrimitive):
                 self.action.args.ccddata.header['MFFILE'] = (
                     self.action.args.master_flat, "Master flat filename")
                 self.action.args.ccddata.header['MTWFFILE'] = (
-                    'mtwif_slice_median_box.fits', "Master twiflat filename")
+                    os.path.basename(self.config.instrument.smoothed_mtwif_fn), "Master twiflat filename")
+                
             else:
                 # do the correction
                 self.action.args.ccddata.data *= mflat.data

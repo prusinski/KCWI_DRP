@@ -180,7 +180,7 @@ class MakeMasterFlat(BaseImg):
                                                              waves[1]))
 
         # correct vignetting if we are using internal flats
-        if internal:
+        if internal & (self.config.instrument.vignetting_correction):
             self.logger.info("Internal flats require vignetting correction")
             # get good region for fitting
             if self.action.args.camera == 0:    # Blue
@@ -347,6 +347,8 @@ class MakeMasterFlat(BaseImg):
                     (resflat[1] + resflat[0] * posmap.data.flat[i]) / \
                     np.polyval(buffit, posmap.data.flat[i]) * newflat.flat[i]
             self.logger.info("Vignetting correction complete.")
+        else:
+            print('Either not internal or vignetting_correction = False')
 
         self.logger.info("Fitting master illumination")
         # now fit master flat

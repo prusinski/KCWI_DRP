@@ -65,7 +65,12 @@ class StackFlats(BaseImg):
         for flat in combine_list:
             # get flat intensity (int) image file name in redux directory
             if self.action.args.stack_type == 'STWIF':
+                # if os.path.exists(self.config.instrument.smoothed_mtwif_fn) & (self.config.instrument.smoothed_mtwif):
+                #     print('Stacking intf frames')
                 stackf.append(strip_fname(flat) + '_intf.fits') #intd
+                # else:
+                #     print('Stacking intd frames')
+                #     stackf.append(strip_fname(flat) + '_intd.fits')
             else: # SDOME, SFLAT
                 stackf.append(strip_fname(flat) + '_intd.fits')
             flatfn = os.path.join(self.config.instrument.cwd,
@@ -84,7 +89,12 @@ class StackFlats(BaseImg):
         # Get the BPM out of one of the flats (bpm is the same for all)
         # and add it to the stacked flat as the stack's mask
         if self.action.args.stack_type == 'STWIF':
+            # if os.path.exists(self.config.instrument.smoothed_mtwif_fn) & (self.config.instrument.smoothed_mtwif):
+            #     print('Stacking intf frames')
             last_flat_name = strip_fname(combine_list[-1]) + '_intf.fits' #intd
+            # else:
+            #     print('Stacking intd frames')
+            #     last_flat_name = strip_fname(combine_list[-1]) + '_intd.fits'
         else:
             last_flat_name = strip_fname(combine_list[-1]) + '_intd.fits'
         last_flat_path = os.path.join(self.config.instrument.cwd,
